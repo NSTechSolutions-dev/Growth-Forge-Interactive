@@ -14,15 +14,8 @@ try {
   execSync("git add -A", { cwd: tempDir, stdio: "inherit" });
   execSync('git commit -m "Deploy static site"', { cwd: tempDir, stdio: "inherit" });
   execSync("git push -f origin gh-pages", { cwd: tempDir, stdio: "inherit" });
-  execSync(
-    "gh api repos/:owner/:repo/pages --method PUT -f build_type=legacy -f 'source[branch]=gh-pages' -f 'source[path]=/'",
-    { cwd: process.cwd(), stdio: "inherit" },
-  );
-  execSync("gh api repos/:owner/:repo/pages/builds --method POST", {
-    cwd: process.cwd(),
-    stdio: "inherit",
-  });
-  console.log("Deployed to gh-pages and triggered a Pages rebuild.");
+  execSync("gh workflow run deploy.yml --ref main", { cwd: process.cwd(), stdio: "inherit" });
+  console.log("Pushed gh-pages and triggered the GitHub Actions deploy workflow.");
 } finally {
   await rm(tempDir, { recursive: true, force: true });
 }
