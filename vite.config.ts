@@ -5,14 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
 function resolveBasePath(): string {
-  if (process.env.VITE_BASE_PATH) {
-    return process.env.VITE_BASE_PATH;
-  }
-
-  const repository = process.env.GITHUB_REPOSITORY;
-  if (repository) {
-    const repoName = repository.split("/")[1];
-    return repoName ? `/${repoName}/` : "/";
+  const configured = process.env.VITE_BASE_PATH;
+  if (configured !== undefined) {
+    if (configured === "" || configured === "/") return "/";
+    return configured.endsWith("/") ? configured : `${configured}/`;
   }
 
   return "/";

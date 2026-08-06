@@ -19,7 +19,7 @@ Pushes to `main` deploy automatically via [.github/workflows/deploy.yml](.github
 1. In the repo: **Settings → Pages → Build and deployment → Source** → **GitHub Actions**
 2. Push to `main` (or run the workflow manually from the Actions tab)
 
-The site is published at `https://<org>.github.io/Growth-Forge-Interactive/` unless you use a custom domain.
+The site is published at [https://myleadfoundry.com](https://myleadfoundry.com). For a GitHub Pages project URL instead, set `VITE_BASE_PATH=/Growth-Forge-Interactive/` in the workflow before building.
 
 ### GitLab Pages
 
