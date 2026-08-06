@@ -35,7 +35,6 @@ jobs:
         env:
           VITE_BASE_PATH: /
           VITE_SITE_URL: https://myleadfoundry.com
-          LEGACY_ASSET_BASE_URL: https://myleadfoundry.com/assets
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

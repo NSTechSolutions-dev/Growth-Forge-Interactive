@@ -1,5 +1,6 @@
-import { copyFile, cp, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 
 const clientDir = join(process.cwd(), "dist/client");
 const shellPath = join(clientDir, "_shell.html");
@@ -7,6 +8,7 @@ const shellPath = join(clientDir, "_shell.html");
 await copyFile(shellPath, join(clientDir, "index.html"));
 await copyFile(shellPath, join(clientDir, "404.html"));
 await writeFile(join(clientDir, ".nojekyll"), "");
+await copyFile(join(process.cwd(), "public/CNAME"), join(clientDir, "CNAME"));
 
 for (const file of ["index.html", "404.html", "_shell.html"]) {
   const filePath = join(clientDir, file);
@@ -14,22 +16,11 @@ for (const file of ["index.html", "404.html", "_shell.html"]) {
   await writeFile(filePath, html.replaceAll("/Growth-Forge-Interactive/", "/"));
 }
 
-const legacyDir = join(clientDir, "Growth-Forge-Interactive");
-await cp(join(clientDir, "assets"), join(legacyDir, "assets"), { recursive: true });
-await copyFile(join(clientDir, "favicon.svg"), join(legacyDir, "favicon.svg"));
-
-const legacyAssetBase = process.env.LEGACY_ASSET_BASE_URL ?? "https://myleadfoundry.com/assets";
-const legacyBundles = ["index-a4izTrnP.js", "routes-D8WRB7gF.js", "styles-Dxwcaxmg.css"];
-
-for (const bundle of legacyBundles) {
-  try {
-    const response = await fetch(`${legacyAssetBase}/${bundle}`);
-    if (response.ok) {
-      await writeFile(join(legacyDir, "assets", bundle), Buffer.from(await response.arrayBuffer()));
-    }
-  } catch {
-    // Skip when bootstrapping a fresh environment.
-  }
-}
+// Keep old bundle paths alive while cached HTML is still served.
+const legacyDir = join(clientDir, "Growth-Forge-Interactive", "assets");
+await mkdir(legacyDir, { recursive: true });
+await copyFile(join(clientDir, "assets", "index-Dn2ybgS3.js"), join(legacyDir, "index-a4izTrnP.js"));
+await copyFile(join(clientDir, "assets", "routes-CJGVwU7h.js"), join(legacyDir, "routes-D8WRB7gF.js"));
+await copyFile(join(clientDir, "assets", "styles-Dxwcaxmg.css"), join(legacyDir, "styles-Dxwcaxmg.css"));
 
 console.log("Prepared GitHub Pages artifacts in dist/client");
