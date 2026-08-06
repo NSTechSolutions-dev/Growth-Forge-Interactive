@@ -1,9 +1,22 @@
 import { defineConfig, loadEnv } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { nitro } from "nitro/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
+
+function resolveBasePath(): string {
+  if (process.env.VITE_BASE_PATH) {
+    return process.env.VITE_BASE_PATH;
+  }
+
+  const repository = process.env.GITHUB_REPOSITORY;
+  if (repository) {
+    const repoName = repository.split("/")[1];
+    return repoName ? `/${repoName}/` : "/";
+  }
+
+  return "/";
+}
 
 export default defineConfig(({ command, mode }) => {
   const envDefine: Record<string, string> = {};
@@ -13,8 +26,10 @@ export default defineConfig(({ command, mode }) => {
   }
 
   const isDevBuild = command === "build" && mode === "development";
+  const base = resolveBasePath();
 
   return {
+    base,
     define: envDefine,
     ...(isDevBuild
       ? {
@@ -59,14 +74,20 @@ export default defineConfig(({ command, mode }) => {
             specifiers: ["server-only"],
           },
         },
+        ...(command === "build"
+          ? {
+              spa: {
+                enabled: true,
+                prerender: {
+                  crawlLinks: true,
+                },
+              },
+              prerender: {
+                failOnError: false,
+              },
+            }
+          : {}),
       }),
-      ...(command === "build"
-        ? [
-            nitro({
-              defaultPreset: "cloudflare-module",
-            }),
-          ]
-        : []),
       viteReact(),
     ],
   };
